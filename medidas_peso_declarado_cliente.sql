@@ -1,8 +1,9 @@
 /*
 Título: Medidas y peso declarado por el cliente
 Contexto: Recorte del reporte de sobrepesos AAA. Solo lo que declaró el cliente.
-Qué hace: Por cada guía devuelve largo, ancho, alto y el peso declarado.
+Qué hace: Por cada guía devuelve largo, ancho, alto y el peso total declarado.
           La guía va incluida para cruzar el resultado con la lista.
+          El peso sale de order.package.weight, el mismo nodo que las medidas.
 
 Tablas:
 - transactions_account
@@ -16,14 +17,14 @@ Rutas JSON:
 - $.order.package.length
 - $.order.package.width
 - $.order.package.height
-- $.order.overweight_data.overweight.et_weight
+- $.order.package.weight
 
 Columnas que devuelve:
 - guia
 - largo
 - ancho
 - alto
-- peso_declarado
+- peso_total
 
 Cómo ajustarlo:
 - Sustituye las guías del subquery `lista` y del FIELD para conservar el orden.
@@ -38,7 +39,7 @@ SELECT
     ta.details_transactions->>'$.order.package.length' AS largo,
     ta.details_transactions->>'$.order.package.width' AS ancho,
     ta.details_transactions->>'$.order.package.height' AS alto,
-    ta.details_transactions->>'$.order.overweight_data.overweight.et_weight' AS peso_declarado
+    ta.details_transactions->>'$.order.package.weight' AS peso_total
 FROM (
     SELECT 'ENVTOD1212526062' AS guia UNION ALL
     SELECT 'ENVTOD1212526649' UNION ALL
@@ -294,7 +295,7 @@ LEFT JOIN transactions_account ta
         ORDER BY
             (
                 t2.details_transactions->>'$.order.package.length' IS NOT NULL
-                OR t2.details_transactions->>'$.order.overweight_data.overweight.et_weight' IS NOT NULL
+                OR t2.details_transactions->>'$.order.package.weight' IS NOT NULL
             ) DESC,
             t2.id DESC
         LIMIT 1
